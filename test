@@ -1,0 +1,3 @@
+#!/bin/bash
+# Run all project tests, ignoring third_party. Usage: just type 'test'
+PYTHONPATH=. pytest --ignore=third_party "$@"
