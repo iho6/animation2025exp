@@ -84,8 +84,37 @@ def video_to_skeleton(input_video, output_json, output_annotated=None,
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Video -> 2D skeleton (MediaPipe Pose)")
     parser.add_argument("input_video", type=str, help="Path to input video file")
-    parser.add_argument("--out_json", type=str, default="skeletons.json", help="Path to output JSON")
-    parser.add_argument("--out_vid", type=str, default=None, help="(Optional) annotated output video path (mp4)")
+    parser.add_argument("--out_json", type=str, default=None, help="Path to output JSON (default: same as video, .json)")
+    parser.add_argument("--out_vid", type=str, default=None, help="Annotated output video path (default: same as video, .mp4)")
     args = parser.parse_args()
 
-    video_to_skeleton(args.input_video, args.out_json, args.out_vid)
+    # Determine output base path
+    input_path = Path(args.input_video)
+    base = input_path.with_suffix("")
+    # Handle/correct extensions and defaults
+    out_json = args.out_json
+    out_vid = args.out_vid
+    if not out_json and not out_vid:
+        out_json = str(base) + ".json"
+        out_vid = str(base) + "_skeleton.mp4"
+    elif out_json and not out_vid:
+        # Correct extension if needed
+        out_json_path = Path(out_json)
+        if out_json_path.suffix != ".json":
+            out_json = str(out_json_path.with_suffix(".json"))
+        out_vid = str(Path(out_json).with_suffix("_skeleton.mp4"))
+    elif out_vid and not out_json:
+        out_vid_path = Path(out_vid)
+        if out_vid_path.suffix != ".mp4":
+            out_vid = str(out_vid_path.with_suffix(".mp4"))
+        out_json = str(Path(out_vid).with_suffix(".json"))
+    else:
+        # Both provided, correct extensions if needed
+        out_json_path = Path(out_json)
+        if out_json_path.suffix != ".json":
+            out_json = str(out_json_path.with_suffix(".json"))
+        out_vid_path = Path(out_vid)
+        if out_vid_path.suffix != ".mp4":
+            out_vid = str(out_vid_path.with_suffix(".mp4"))
+
+    video_to_skeleton(args.input_video, out_json, out_vid)
