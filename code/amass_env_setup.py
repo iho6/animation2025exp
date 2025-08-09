@@ -66,44 +66,60 @@ def main():
     mv = MeshViewer(width=imw, height=imh, use_offscreen=True)
 
     body_pose_beta = bm(**{k: v for k, v in body_parms.items() if k in ['pose_body', 'betas']})
+
+    import os
+    output_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), '../data/output/amass'))
+    os.makedirs(output_dir, exist_ok=True)
+
+    def save_image(image, name):
+        import imageio
+        out_path = os.path.join(output_dir, name)
+        imageio.imwrite(out_path, image)
+        print(f"Saved: {out_path}")
+
     def vis_body_pose_beta(fId=0):
         body_mesh = trimesh.Trimesh(vertices=c2c(body_pose_beta.v[fId]), faces=faces, vertex_colors=np.tile(colors['grey'], (6890, 1)))
         mv.set_static_meshes([body_mesh])
         body_image = mv.render(render_wireframe=False)
-        show_image(body_image)
+        save_image(body_image, f'pose_beta_{fId}.png')
     vis_body_pose_beta(fId=0)
 
     body_pose_hand = bm(**{k: v for k, v in body_parms.items() if k in ['pose_body', 'betas', 'pose_hand']})
+
     def vis_body_pose_hand(fId=0):
         body_mesh = trimesh.Trimesh(vertices=c2c(body_pose_hand.v[fId]), faces=faces, vertex_colors=np.tile(colors['grey'], (6890, 1)))
         mv.set_static_meshes([body_mesh])
         body_image = mv.render(render_wireframe=False)
-        show_image(body_image)
+        save_image(body_image, f'pose_hand_{fId}.png')
     vis_body_pose_hand(fId=0)
+
 
     def vis_body_joints(fId=0):
         joints = c2c(body_pose_hand.Jtr[fId])
         joints_mesh = points_to_spheres(joints, point_color=colors['red'], radius=0.005)
         mv.set_static_meshes([joints_mesh])
         body_image = mv.render(render_wireframe=False)
-        show_image(body_image)
+        save_image(body_image, f'joints_{fId}.png')
     vis_body_joints(fId=0)
 
     body_dmpls = bm(**{k: v for k, v in body_parms.items() if k in ['pose_body', 'betas', 'pose_hand', 'dmpls']})
+
     def vis_body_dmpls(fId=0):
         body_mesh = trimesh.Trimesh(vertices=c2c(body_dmpls.v[fId]), faces=faces, vertex_colors=np.tile(colors['grey'], (6890, 1)))
         mv.set_static_meshes([body_mesh])
         body_image = mv.render(render_wireframe=False)
-        show_image(body_image)
+        save_image(body_image, f'dmpls_{fId}.png')
     vis_body_dmpls(fId=0)
 
     body_trans_root = bm(**{k: v for k, v in body_parms.items() if k in ['pose_body', 'betas', 'pose_hand', 'dmpls', 'trans', 'root_orient']})
+
     def vis_body_trans_root(fId=0):
         body_mesh = trimesh.Trimesh(vertices=c2c(body_trans_root.v[fId]), faces=faces, vertex_colors=np.tile(colors['grey'], (6890, 1)))
         mv.set_static_meshes([body_mesh])
         body_image = mv.render(render_wireframe=False)
-        show_image(body_image)
+        save_image(body_image, f'trans_root_{fId}.png')
     vis_body_trans_root(fId=0)
+
 
     def vis_body_transformed(fId=0):
         body_mesh = trimesh.Trimesh(vertices=c2c(body_trans_root.v[fId]), faces=faces, vertex_colors=np.tile(colors['grey'], (6890, 1)))
@@ -111,7 +127,7 @@ def main():
         body_mesh.apply_transform(trimesh.transformations.rotation_matrix(30, (1, 0, 0)))
         mv.set_static_meshes([body_mesh])
         body_image = mv.render(render_wireframe=False)
-        show_image(body_image)
+        save_image(body_image, f'transformed_{fId}.png')
     vis_body_transformed(fId=0)
 
 if __name__ == "__main__":
