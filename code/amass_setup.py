@@ -25,10 +25,11 @@ from os import path as osp
 def main():
     parser = argparse.ArgumentParser(description='AMASS/SMPL Environment Setup and Visualization')
     parser.add_argument('--data', type=str, required=True, help='Path to AMASS/DMPL .npz data file')
-    parser.add_argument('--body_models_dir', type=str, default='../amass/body_models', help='Path to body_models directory (default: ../amass/body_models)')
+    parser.add_argument('--body_models_dir', type=str, default='../third_party/amass/body_models', help='Path to body_models directory (default: ../third_party/amass/body_models)')
     parser.add_argument('--gender', type=str, default=None, help='Gender (neutral, male, female). If not set, will use gender from data file.')
     parser.add_argument('--num_betas', type=int, default=16, help='Number of body shape betas')
     parser.add_argument('--num_dmpls', type=int, default=8, help='Number of DMPL parameters')
+    parser.add_argument('--output_dir', type=str, default=None, help='Directory to save output images (default: ../data/output/amass)')
     args = parser.parse_args()
 
     comp_device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
@@ -38,10 +39,15 @@ def main():
     print('The subject of the mocap sequence is  {}.'.format(subject_gender))
 
     from human_body_prior.body_model.body_model import BodyModel
-    bm_fname = osp.join(args.body_models_dir, 'smplh', str(subject_gender), 'model.npz')
-    dmpl_fname = osp.join(args.body_models_dir, 'dmpls', str(subject_gender), 'model.npz')
+    bm_fname_smplh = osp.join(args.body_models_dir, 'smplh', str(subject_gender), 'model.npz')
+    bm_fname_dmpl = osp.join(args.body_models_dir, 'dmpls', str(subject_gender), 'model.npz')
+    bm_fname = bm_fname_smplh if osp.exists(bm_fname_smplh) else bm_fname_dmpl
+    if not osp.exists(bm_fname):
+        raise FileNotFoundError(f"No valid body model found for gender '{subject_gender}'. Checked: {bm_fname_smplh} and {bm_fname_dmpl}")
+    dmpl_fname = bm_fname_dmpl
     num_betas = args.num_betas
     num_dmpls = args.num_dmpls
+    print(f"Using body model: {bm_fname}")
     bm = BodyModel(bm_fname=bm_fname, num_betas=num_betas, num_dmpls=num_dmpls, dmpl_fname=dmpl_fname).to(comp_device)
     faces = c2c(bm.f)
     time_length = len(bdata['trans'])
@@ -68,7 +74,10 @@ def main():
     body_pose_beta = bm(**{k: v for k, v in body_parms.items() if k in ['pose_body', 'betas']})
 
     import os
-    output_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), '../data/output/amass'))
+    if args.output_dir is not None:
+        output_dir = os.path.abspath(args.output_dir)
+    else:
+        output_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), '../data/output/amass'))
     os.makedirs(output_dir, exist_ok=True)
 
     def save_image(image, name):

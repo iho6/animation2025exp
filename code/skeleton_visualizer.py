@@ -67,10 +67,22 @@ def main(json_path, out_2d='skeleton2d.mp4', out_3d='skeleton3d.mp4', img_size=(
         ax.set_zlim(-1, 1)
         ax.set_axis_off()
         plt.tight_layout()
-        # Capture the plot as an image
+    # Capture the plot as an image (matplotlib >=3.1)
         fig.canvas.draw()
-        im = np.frombuffer(fig.canvas.tostring_rgb(), dtype=np.uint8)
-        im = im.reshape(fig.canvas.get_width_height()[::-1] + (3,))
+        # Try buffer_rgba (matplotlib >=3.1), fallback to tostring_argb if needed
+        try:
+            buf = fig.canvas.buffer_rgba()
+            im = np.frombuffer(buf, dtype=np.uint8)
+            im = im.reshape(fig.canvas.get_width_height()[::-1] + (4,))
+            # Convert RGBA to RGB by dropping alpha
+            im = im[..., :3]
+        except AttributeError:
+            # Fallback for older matplotlib
+            buf = fig.canvas.tostring_argb()
+            im = np.frombuffer(buf, dtype=np.uint8)
+            im = im.reshape(fig.canvas.get_width_height()[::-1] + (4,))
+            # Convert ARGB to RGB
+            im = im[..., 1:4]
         ims.append(im)
     out2d.release()
     # Save 3D video

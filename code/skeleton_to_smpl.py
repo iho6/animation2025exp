@@ -2,7 +2,7 @@
 TODO: Implement conversion from MediaPipe skeleton output to SMPL-compatible skeleton/animation.
 
 Goal:
-- Take skeleton/landmark output (JSON) from MediaPipe (via video_to_skeleton or skeleton_visualizer).
+- Take skeleton/landmark output (JSON) from MediaPipe (via get_skeleton or skeleton_visualizer).
 - Map MediaPipe keypoints to SMPL joint structure.
 - Convert per-frame keypoints to SMPL pose parameters (rotation, translation, etc.).
 - Output animation data compatible with SMPL/AMASS mesh models.
