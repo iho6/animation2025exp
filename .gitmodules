@@ -1,0 +1,3 @@
+[submodule "third_party/pose2mesh"]
+	path = third_party/pose2mesh
+	url = https://github.com/hongsukchoi/Pose2Mesh_RELEASE.git

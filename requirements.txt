@@ -1,3 +1,5 @@
+
+
 scenedetect
 opencv-python-headless
 torch
@@ -5,4 +7,6 @@ torchvision
 scikit-learn
 numpy
 mediapipe
-opencv-python
+pyyaml
+easydict
+matplotlib

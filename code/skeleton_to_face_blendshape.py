@@ -2,7 +2,7 @@
 TODO: Implement conversion from MediaPipe skeleton (with face landmarks) to blendshape scores.
 
 Goal:
-- Take skeleton/landmark output (JSON) from skeleton_visualizer or MediaPipe Face Landmarker.
+- Take skeleton/landmark output (JSON) from visualize_skeleton or MediaPipe Face Landmarker.
 - Map facial keypoints to blendshape weights (e.g., for mouth open, smile, brow raise, etc.).
 - Output blendshape scores per frame for use in facial animation (e.g., for 3D models in Blender, Unity, etc.).
 
